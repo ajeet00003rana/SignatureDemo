@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Pad</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .signature-container {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            border: 1px solid #000;
+            display: block;
+        }
+        .buttons {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .buttons button {
+            margin: 0 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="signature-container">
+        <canvas id="signature-pad" width="500" height="200"></canvas>
+        <div class="buttons">
+            <button id="clear-button">Clear</button>
+            <button id="save-button">Save</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchmove', draw);
+
+        document.getElementById('clear-button').addEventListener('click', clearCanvas);
+        document.getElementById('save-button').addEventListener('click', saveSignature);
+
+        function startDrawing(event) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(getX(event), getY(event));
+            event.preventDefault();
+        }
+
+        function stopDrawing(event) {
+            if (isDrawing) {
+                ctx.stroke();
+                ctx.closePath();
+                isDrawing = false;
+            }
+            event.preventDefault();
+        }
+
+        function draw(event) {
+            if (isDrawing) {
+                ctx.lineTo(getX(event), getY(event));
+                ctx.stroke();
+            }
+            event.preventDefault();
+        }
+
+        function getX(event) {
+            if (event.touches && event.touches.length > 0) {
+                return event.touches[0].clientX - canvas.offsetLeft;
+            } else {
+                return event.clientX - canvas.offsetLeft;
+            }
+        }
+
+        function getY(event) {
+            if (event.touches && event.touches.length > 0) {
+                return event.touches[0].clientY - canvas.offsetTop;
+            } else {
+                return event.clientY - canvas.offsetTop;
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveSignature() {
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'signature.png';
+            link.click();
+        }
+    </script>
+</body>
+</html>
